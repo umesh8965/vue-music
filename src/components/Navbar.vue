@@ -6,16 +6,40 @@
               <router-link :to="{ name: 'Home'}">Vue Music</router-link> 
           </h1>
           <div class="links">
-              <button>Logout</button>
-              <router-link class="btn" :to="{ name:'Signup'}">Signup</router-link>
-              <router-link class="btn" :to="{ name:'Login'}">Login</router-link>
+              <div v-if="user">
+                <button @click="handleLogout">Logout</button>
+              </div>
+              <div v-else>
+                <router-link class="btn" :to="{ name:'Signup'}">Signup</router-link>
+                <router-link class="btn" :to="{ name:'Login'}">Login</router-link>
+              </div>
           </div>
       </nav>
   </div>
 </template>
 
 <script>
+import useLogout from "@/composables/useLogout"
+import getUser from "@/composables/getUser"
+import {useRouter} from "vue-router"
+
 export default {
+
+    setup(){
+
+        const { logout } = useLogout()
+        const router = useRouter()
+        const { user } = getUser()
+
+        const handleLogout = async () => {
+            await logout
+            console.log('logged out')
+            router.push({ name: "Login" })
+        }
+
+        return { handleLogout, user }
+
+    }
 
 }
 </script>
