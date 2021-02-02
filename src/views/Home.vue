@@ -1,16 +1,26 @@
 <template>
   <div class="home">
-    Home
+    <div v-if="error" class="error">Could not fetch data</div>
+    <div v-if="documents">
+          <ListView :playlists="documents" />
+    </div>
   </div>
 </template>
 
 <script>
 // @ is an alias to /src
 
+import getCollection from "@/composables/getCollection"
+import ListView from "@/components/ListView"
+
 export default {
   name: 'Home',
-  components: {
-    
-  }
+  components: { ListView },
+ setup(){
+   const { error, documents } = getCollection("playlists")
+
+   return { error, documents }
+ }
+
 }
 </script>
