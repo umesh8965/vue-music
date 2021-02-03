@@ -17,7 +17,15 @@
          <button v-if="ownership" @click="handleDelete">Delete Playlist</button>
      </div>
      <div class="song-list">
-         <p>Songs list here</p>
+       <div v-if="!playlistdetail.songs.length">No song has been added.</div>
+       <div v-for="song in playlistdetail.songs" :key="song.id" class="single-song">
+         <div class="details">
+          <h3>{{ song.title }}</h3>
+          <p>{{ song.artist }}</p>
+        </div>
+          <button v-if="ownership" @click="handleSongDelete(song.id)">Delete</button>
+       </div>
+          <AddSong v-if="ownership" :playlistdetail="playlistdetail" />
      </div>
  </div>
 </template>
@@ -29,15 +37,17 @@ import useDocument from "@/composables/useDocument"
 import getUser from "@/composables/getUser"
 import { computed } from "vue"
 import { useRouter } from 'vue-router'
+import AddSong from "@/components/AddSong"
 
 export default {
     props: ["id"],
+    components:{AddSong},
     setup(props){
 
         // we can use 'playlistdetail' instand of 'document' -> just name refereance chnage.
         const { error, document: playlistdetail } = getDocument('playlists', props.id)
         const { user } = getUser()
-        const { deleteDoc } = useDocument('playlists', props.id)
+        const { deleteDoc, updateDoc } = useDocument('playlists', props.id)
         const { deleteImage } = useStorage()
         const router = useRouter()
 
@@ -52,14 +62,19 @@ export default {
           await deleteDoc()
           router.push({ name: 'Home' })
         }
+
+        const handleSongDelete = async (id) => {
+          const deleteSongArray = playlistdetail.value.songs.filter((song) => song.id != id )
+          await updateDoc({ songs : deleteSongArray })
+        }
        
-      return { error, playlistdetail, ownership, handleDelete}  
+      return { error, playlistdetail, ownership, handleDelete, handleSongDelete}  
     }
 }
 </script>
 
 <style>
- .playlist-details {
+  .playlist-details {
     display: grid;
     grid-template-columns: 1fr 2fr;
     gap: 80px;
@@ -96,5 +111,13 @@ export default {
   }
   .description {
     text-align: left;
+  }
+  .single-song {
+    padding: 10px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px dashed var(--secondary);
+    margin-bottom: 20px;
   }
 </style>
